@@ -1,59 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:arkit_plugin/arkit_plugin.dart';
+import 'package:vector_math/vector_math_64.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MaterialApp(home: MyApp()));
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-
-    return MaterialApp(
-
-          title: 'Startup Name Generator',
-          home: RandomWords(),
-
-    );
-  }
+  _MyAppState createState() => _MyAppState();
 }
 
-class RandomWords extends StatefulWidget {
-  @override
-  _RandomWordsState createState() => _RandomWordsState();
-}
+class _MyAppState extends State<MyApp> {
+  ARKitController arkitController;
 
-class _RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _biggerFont = TextStyle(fontSize: 18.0);
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Startup Name Generator'),
-      ),
-      body: _buildSuggestions(),
-    );
+  void dispose() {
+    arkitController?.dispose();
+    super.dispose();
   }
 
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          if (i.isOdd) return Divider(); /*2*/
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: const Text('ARKit in Flutter')),
+      body: ARKitSceneView(onARKitViewCreated: onARKitViewCreated));
 
-          final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
-          }
-          return _buildRow(_suggestions[index]);
-        });
-  }
-
-  Widget _buildRow(WordPair pair) {
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-    );
+  void onARKitViewCreated(ARKitController arkitController) {
+    this.arkitController = arkitController;
+    final node = ARKitNode(
+        geometry: ARKitSphere(radius: 0.1), position: Vector3(0, 0, -0.5));
+    this.arkitController.add(node);
   }
 }
